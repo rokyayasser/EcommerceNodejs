@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable arrow-body-style */
 const globalError = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";

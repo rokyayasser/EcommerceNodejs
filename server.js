@@ -1,11 +1,16 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+
 dotenv.config({ path: "config.env" });
 const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
 const dbConnection = require("./config/database");
+
+//Importing routes
 const categoryRoute = require("./routes/categoryRoute");
+const subCategoryRoute = require("./routes/subCategoryRoute");
+const brandRoute = require("./routes/brandRoute");
 
 //Connect with db
 dbConnection();
@@ -23,6 +28,8 @@ if (process.env.NODE_ENV === "development") {
 
 //Mount Routes
 app.use("/api/v1/categories", categoryRoute);
+app.use("/api/v1/subCategories", subCategoryRoute);
+app.use("/api/v1/brands", brandRoute);
 
 //Create error and send it to error handling middleware
 app.all("/*any", (req, res, next) => {
@@ -32,7 +39,7 @@ app.all("/*any", (req, res, next) => {
 //Global error handling middleware
 app.use(globalError);
 
-const PORT = process.env.PORT;
+const { PORT } = process.env;
 const server = app.listen(PORT, () => {
   console.log(`App running on port ${PORT}`);
 });

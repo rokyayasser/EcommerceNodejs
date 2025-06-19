@@ -1,8 +1,8 @@
 //buisness logic (services)
 const slugify = require("slugify");
+const expressAsyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
 const CategoryModel = require("../models/categoryModel");
-const expressAsyncHandler = require("express-async-handler");
 
 //@desc Get list of categories
 //@route GET /api/v1/categories
@@ -61,7 +61,7 @@ exports.deleteCategory = expressAsyncHandler(async (req, res, next) => {
 //@route POST /api/v1/categories
 //@access Private
 exports.createCategory = expressAsyncHandler(async (req, res) => {
-  const name = req.body.name;
+  const { name } = req.body;
   const category = await CategoryModel.create({ name, slug: slugify(name) });
   res.status(201).json({ data: category });
 });
