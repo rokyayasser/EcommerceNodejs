@@ -11,6 +11,7 @@ const dbConnection = require("./config/database");
 const categoryRoute = require("./routes/categoryRoute");
 const subCategoryRoute = require("./routes/subCategoryRoute");
 const brandRoute = require("./routes/brandRoute");
+const productRoute = require("./routes/productRoute");
 
 //Connect with db
 dbConnection();
@@ -30,6 +31,7 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/subCategories", subCategoryRoute);
 app.use("/api/v1/brands", brandRoute);
+app.use("/api/v1/products", productRoute);
 
 //Create error and send it to error handling middleware
 app.all("/*any", (req, res, next) => {
