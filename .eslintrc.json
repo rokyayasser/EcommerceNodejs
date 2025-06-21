@@ -12,6 +12,7 @@
     "no-param-reassign": "off",
     "no-return-await": "off",
     "no-underscore-dangle": "off",
+    "node/no-unsupported-features/es-syntax": "off",
     "class-methods-use-this": "off",
     "no-undef": "error",
     "prefer-destructuring": ["warn", { "object": true, "array": false }],

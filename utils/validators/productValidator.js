@@ -70,7 +70,7 @@ exports.createProductValidation = [
     .withMessage("Invalid ID format for subcategory")
     .custom((subCategoriesIds) =>
       SubCategoryModel.find({
-        _id: { $exists: true, $in: subCategoriesIds },
+        _id: { $exists: true, $in: subCategoriesIds }, //sees if the ids in these subcategories are the same that i send
       }).then((result) => {
         if (result.length < 1 || result.length !== subCategoriesIds.length) {
           return Promise.reject(new Error("Some subcategories do not exist"));
@@ -78,25 +78,29 @@ exports.createProductValidation = [
         console.log(result.length);
       })
     )
-    .custom((val, { req }) =>
-      SubCategoryModel.find({ category: req.body.category }).then(
-        (subCategories) => {
-          const subCategoriesIdsInDB = [];
-          subCategories.forEach((subCategory) => {
-            subCategoriesIdsInDB.push(subCategory._id.toString());
-          });
-          console.log(subCategoriesIdsInDB);
-          // const checker = val.every((v) => subCategoriesIdsInDB.includes(v));
-          // console.log(checker);
+    .custom(
+      (
+        val,
+        { req } //to check if these subcategories do belong to this category
+      ) =>
+        SubCategoryModel.find({ category: req.body.category }).then(
+          (subCategories) => {
+            const subCategoriesIdsInDB = [];
+            subCategories.forEach((subCategory) => {
+              subCategoriesIdsInDB.push(subCategory._id.toString());
+            });
+            console.log(subCategoriesIdsInDB);
+            // const checker = val.every((v) => subCategoriesIdsInDB.includes(v));
+            // console.log(checker);
 
-          // check if all subcategories ids in db include subCategories in req.body
-          if (!val.every((v) => subCategoriesIdsInDB.includes(v))) {
-            return Promise.reject(
-              new Error("Some subcategories do not belong to this category")
-            );
+            // check if all subcategories ids in db include subCategories in req.body
+            if (!val.every((v) => subCategoriesIdsInDB.includes(v))) {
+              return Promise.reject(
+                new Error("Some subcategories do not belong to this category")
+              );
+            }
           }
-        }
-      )
+        )
     ),
   check("brand")
     .optional()
