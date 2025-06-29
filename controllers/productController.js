@@ -9,17 +9,21 @@ const ProductModel = require("../models/productModel");
 //@route GET /api/v1/products
 //@access Public
 exports.getProducts = expressAsyncHandler(async (req, res) => {
+  const documentsCount = await ProductModel.countDocuments();
   const apiFeatures = new ApiFeatures(ProductModel.find(), req.query)
-    .paginate()
+    .paginate(documentsCount)
     .filter()
     .search()
     .sort()
     .limitFields();
 
-  const products = await apiFeatures.mongooseQuery;
+  const { mongooseQuery, paginationResult } = apiFeatures;
+
+  const products = await mongooseQuery;
 
   res.status(200).json({
     results: products.length,
+    paginationResult,
     data: products,
   });
 });
