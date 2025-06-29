@@ -8,13 +8,12 @@ const ProductModel = require("../models/productModel");
 //@route GET /api/v1/products
 //@access Public
 exports.getProducts = expressAsyncHandler(async (req, res) => {
-  //1) Filtering
-  const queryStringObj = { ...req.query }; //copying query params
-  const excludedFields = ["page", "sort", "limit", "fields"];
-  excludedFields.forEach((field) => delete queryStringObj[field]); //removing excluded fields from query params
+  const queryStringObj = { ...req.query };
+  const excludedFields = ["page", "sort", "limit", "fields", "keyword"];
+  excludedFields.forEach((field) => delete queryStringObj[field]);
 
-  //Apply filtering using gt, gte, lt, lte, in
-
+  // 1) Filtering
+  const filterConditions = [];
   const queryObj = {};
   Object.keys(queryStringObj).forEach((key) => {
     if (key.includes("[")) {
@@ -25,39 +24,59 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
       queryObj[key] = queryStringObj[key];
     }
   });
+  filterConditions.push(queryObj);
 
-  console.log("Query Object:", queryObj);
-  // let queryString = JSON.stringify(queryStringObj); //convert to string
-  // queryString = queryString.replace(
-  //   /\b(gt|gte|lt|lte|in)\b/g,
-  //   (match) => `$${match}` //adding $ sign to gt, gte, lt, lte, in
-  // );
-  // console.log(JSON.parse(queryString));
-
-  //2) Pagination
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 50;
-  const skip = (page - 1) * limit; //skipping first 5 document
-
-  // Build query
-  let mongooseQuery = ProductModel.find(queryObj);
-
-  if (req.query.sort) {
-    mongooseQuery = mongooseQuery.sort(req.query.sort);
-  } else {
-    mongooseQuery = mongooseQuery.sort("-createdAt"); // optional default
+  // 2) Searching
+  if (req.query.keyword) {
+    filterConditions.push({
+      $or: [
+        { title: { $regex: req.query.keyword, $options: "i" } },
+        { description: { $regex: req.query.keyword, $options: "i" } },
+      ],
+    });
   }
 
+  // Build query object
+  const finalQueryObj =
+    filterConditions.length > 1
+      ? { $and: filterConditions }
+      : filterConditions[0];
+
+  let mongooseQuery = ProductModel.find(finalQueryObj);
+
+  // 3) Sorting
+  if (req.query.sort) {
+    const sortFields = req.query.sort.split(",").join(" ");
+    mongooseQuery = mongooseQuery.sort(sortFields);
+  } else {
+    mongooseQuery = mongooseQuery.sort("-createdAt");
+  }
+
+  // 4) Field limiting
+  if (req.query.fields) {
+    const fields = req.query.fields.split(",").join(" ");
+    mongooseQuery = mongooseQuery.select(fields);
+  } else {
+    mongooseQuery = mongooseQuery.select("-__v");
+  }
+
+  // 5) Pagination
+  const page = req.query.page * 1 || 1;
+  const limit = req.query.limit * 1 || 50;
+  const skip = (page - 1) * limit;
   mongooseQuery = mongooseQuery
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name -_id" });
 
-  // Execute query
+  // 6) Execute
   const products = await mongooseQuery;
 
-  res.status(200).json({ results: products.length, page, data: products });
-  console.log(products.map((p) => p.price));
+  res.status(200).json({
+    results: products.length,
+    page,
+    data: products,
+  });
 });
 
 //@desc Get specific Product by id
