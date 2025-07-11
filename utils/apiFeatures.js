@@ -50,14 +50,22 @@ class ApiFeatures {
     return this; //returning the object itself
   }
 
-  search() {
+  search(modelName) {
     if (this.queryString.keyword) {
-      this.mongooseQuery = this.mongooseQuery.find({
-        $or: [
-          { title: { $regex: this.queryString.keyword, $options: "i" } },
-          { description: { $regex: this.queryString.keyword, $options: "i" } },
-        ],
-      });
+      if (modelName === "Products") {
+        this.mongooseQuery = this.mongooseQuery.find({
+          $or: [
+            { title: { $regex: this.queryString.keyword, $options: "i" } },
+            {
+              description: { $regex: this.queryString.keyword, $options: "i" },
+            },
+          ],
+        });
+      } else {
+        this.mongooseQuery = this.mongooseQuery.find({
+          name: { $regex: this.queryString.keyword, $options: "i" },
+        });
+      }
     }
     return this; //returning the object itself
   }
