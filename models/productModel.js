@@ -71,8 +71,19 @@ const productSchema = new mongoose.Schema(
     },
   },
 
-  { timestamps: true }
+  {
+    timestamps: true,
+    //to enable virtual population
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 ); //updatedAt & createdAt in database
+
+productSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "product",
+  localField: "_id",
+});
 
 //Mongoose query middleware
 productSchema.pre(/^find/, function (next) {
@@ -81,6 +92,29 @@ productSchema.pre(/^find/, function (next) {
     select: "name -_id",
   });
   next();
+});
+
+const setImageURL = (doc) => {
+  if (doc.imageCover) {
+    const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
+    doc.imageCover = imageUrl;
+  }
+  if (doc.images) {
+    const imagesList = [];
+    doc.images.forEach((image) => {
+      const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+      imagesList.push(imageUrl);
+    });
+    doc.images = imagesList;
+  }
+};
+productSchema.post("init", (doc) => {
+  setImageURL(doc);
+});
+
+productSchema.post("save", (doc) => {
+  //set image baseUrl + image name
+  setImageURL(doc);
 });
 
 module.exports = mongoose.model("Product", productSchema);

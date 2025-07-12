@@ -1,3 +1,5 @@
+const path = require("path");
+
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
@@ -12,6 +14,9 @@ const categoryRoute = require("./routes/categoryRoute");
 const subCategoryRoute = require("./routes/subCategoryRoute");
 const brandRoute = require("./routes/brandRoute");
 const productRoute = require("./routes/productRoute");
+const userRoute = require("./routes/userRoute");
+const authRoute = require("./routes/authRoute");
+const reviewRoute = require("./routes/reviewRoute");
 
 //Connect with db
 dbConnection();
@@ -21,6 +26,7 @@ const app = express();
 
 //middleware before routes (use with middlewares)
 app.use(express.json()); //parsing encoded string into js obj
+app.use(express.static(path.join(__dirname, "uploads"))); //parsing urlencoded data
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -32,6 +38,9 @@ app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/subCategories", subCategoryRoute);
 app.use("/api/v1/brands", brandRoute);
 app.use("/api/v1/products", productRoute);
+app.use("/api/v1/users", userRoute);
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/reviews", reviewRoute);
 
 //Create error and send it to error handling middleware
 app.all("/*any", (req, res, next) => {
