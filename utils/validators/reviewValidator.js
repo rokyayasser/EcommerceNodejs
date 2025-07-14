@@ -61,11 +61,19 @@ exports.deleteReviewValidation = [
         if (!review) {
           throw new Error("Review not found");
         }
-        if (review.user.toString() !== req.user._id.toString()) {
+
+        const reviewUserId = review.user._id
+          ? review.user._id.toString()
+          : review.user.toString();
+
+        if (reviewUserId !== req.user._id.toString()) {
           throw new Error("You are not authorized to delete this review");
         }
+
         return true;
       }
+
+      return true; // admin is allowed
     }),
   validatorMiddleware,
 ];

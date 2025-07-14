@@ -64,6 +64,7 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: [1, "Rating must be above or equal to 1.0"],
       max: [5, "Rating must be below or equal to 5.0"],
+      get: (val) => (val % 1 === 0 ? `${val}.0` : val.toFixed(1)),
     },
     ratingsQuantity: {
       type: Number,
@@ -74,8 +75,8 @@ const productSchema = new mongoose.Schema(
   {
     timestamps: true,
     //to enable virtual population
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
+    toJSON: { virtuals: true, getters: true },
+    toObject: { virtuals: true, getters: true },
   }
 ); //updatedAt & createdAt in database
 

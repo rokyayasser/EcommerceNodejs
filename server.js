@@ -17,6 +17,9 @@ const productRoute = require("./routes/productRoute");
 const userRoute = require("./routes/userRoute");
 const authRoute = require("./routes/authRoute");
 const reviewRoute = require("./routes/reviewRoute");
+const wishlistRoute = require("./routes/wishlistRoute");
+const couponRoute = require("./routes/couponRoute");
+const cartRoute = require("./routes/cartRoute");
 
 //Connect with db
 dbConnection();
@@ -41,6 +44,9 @@ app.use("/api/v1/products", productRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/reviews", reviewRoute);
+app.use("/api/v1/wishlist", wishlistRoute);
+app.use("/api/v1/coupons", couponRoute);
+app.use("/api/v1/cart", cartRoute);
 
 //Create error and send it to error handling middleware
 app.all("/*any", (req, res, next) => {
